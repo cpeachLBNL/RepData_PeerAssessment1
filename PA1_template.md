@@ -2,7 +2,8 @@
 
 
 ## Loading and preprocessing the data
-```{r loader, echo=TRUE}
+
+```r
     # Ensure that present working directory contains activity.csv
     dfRaw <- read.csv("activity.csv")
     # Remove NA rows
@@ -12,34 +13,47 @@
 
 
 ## What is mean total number of steps taken per day?
-```{r meanSteps, fig.height=4, echo=TRUE}
+
+```r
 stepsPerDay <- aggregate(df$steps, by=list(df$date), FUN=sum)$x
 par(mfrow = c(1, 1)) 
 hist(stepsPerDay, main="Histogram of Steps Per Day", 
      xlab="Steps Per Day", breaks=10)
+```
+
+![plot of chunk meanSteps](figure/meanSteps.png) 
+
+```r
 meanStepsPerDay <- mean(stepsPerDay)
 medianStepsPerDay <- median(stepsPerDay)
 ```
-The <u>mean</u> steps per day is:  <b>`r format(meanStepsPerDay)`</b>  
+The <u>mean</u> steps per day is:  <b>10766</b>  
   
-The <u>median</u> steps per day is:  <b>`r format(medianStepsPerDay)`</b>  
+The <u>median</u> steps per day is:  <b>10765</b>  
 
 
 ## What is the average daily activity pattern?
-```{r avgDailyActivityPattern, fig.height=4, echo=TRUE}
+
+```r
 avgStepsPer5MinInterval <- aggregate(df$steps, by=list(df$interval), FUN=mean)
 names(avgStepsPer5MinInterval) <- c("interval", "avgSteps")
 plot(avgStepsPer5MinInterval$interval, avgStepsPer5MinInterval$avgSteps, type="l",
      main="Average Daily Activity Pattern", 
      xlab = "5 min time interval", ylab="Avg number of steps")
+```
+
+![plot of chunk avgDailyActivityPattern](figure/avgDailyActivityPattern.png) 
+
+```r
 maxSteps5MinInterval <- avgStepsPer5MinInterval[which.max(avgStepsPer5MinInterval$avgSteps), "interval"]
 ```
-Interval <b>`r maxSteps5MinInterval`</b> contains the maximum number of steps, on average across all days.  
+Interval <b>835</b> contains the maximum number of steps, on average across all days.  
 
 ## Imputing missing values
 The <b>Strategy for Imputing Missing Data</b> is to replace the NA step values with the average steps per 5 minute interval.  This is implemented below by joining the dfRaw dataset with the avgStepsPer5MinInterval dataset, and then replacing any NA steps with the average values for that specific interval.  A histogram is provided to show the slight change to the distribution as a result of this strategy.  
 
-```{r missingValues, fig.height=4, echo=TRUE}
+
+```r
 countNARows <- sum(is.na(dfRaw$steps))
 # Replace NA steps on each day with the average steps per interval
 dfAll <- merge(dfRaw, avgStepsPer5MinInterval, by="interval")
@@ -48,15 +62,20 @@ dfAll <- dfAll[order(dfAll$date,dfAll$interval),c("steps","date","interval")]
 stepsPerDayAll <- aggregate(dfAll$steps, by=list(dfAll$date), FUN=sum)$x
 hist(stepsPerDayAll, main="Histogram of Steps Per Day \n(After missing values are imputed)", 
      xlab="Steps Per Day", breaks=10)
+```
+
+![plot of chunk missingValues](figure/missingValues.png) 
+
+```r
 meanStepsPerDayAll <- mean(stepsPerDayAll)
 medianStepsPerDayAll <- median(stepsPerDayAll)
 ```
 
-There are <b>`r countNARows`</b> rows with missing values in the dataset.  
+There are <b>2304</b> rows with missing values in the dataset.  
   
-The <u>mean</u> steps per day is:  <b>`r format(meanStepsPerDayAll)`</b>  
+The <u>mean</u> steps per day is:  <b>10766</b>  
   
-The <u>median</u> steps per day is:  <b>`r format(medianStepsPerDayAll)`</b>  
+The <u>median</u> steps per day is:  <b>10766</b>  
 
 Do these values differ from the estimates from the first part of the assignment?  
 With this missing value replacement strategy, the mean is identical to previously calculated mean value (when NA values were dropped).  This makes sense, as the NA values were replaced with the equivalent 5 minute time interval average values.  The median has shifted slightly, towards the mean.
@@ -66,7 +85,8 @@ Also, as a result of replacing the missing values with the interval average valu
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekdayWeekends, fig.height=8, echo=TRUE}
+
+```r
 #Create a new factor variable in the dataset with two levels – “weekday” and “weekend”
 isWeekend <- weekdays(as.Date(dfAll$date), abbreviate=TRUE) %in% c("Sat","Sun")
 dfAll[isWeekend, "dayOfWeekType"] <- "weekend"
@@ -88,6 +108,11 @@ names(avgStepsPer5MinIntervalWeekday) <- c("interval", "avgSteps")
 plot(avgStepsPer5MinIntervalWeekday$interval, avgStepsPer5MinIntervalWeekday$avgSteps, type="l",
     main="Weekday - Average Daily Activity Pattern", 
     xlab = "5 min time interval", ylab="Avg number of steps") 
+```
+
+![plot of chunk weekdayWeekends](figure/weekdayWeekends.png) 
+
+```r
 #reset global graphics parameter to 1 panel
 par(mfrow = c(1, 1)) 
 ```
