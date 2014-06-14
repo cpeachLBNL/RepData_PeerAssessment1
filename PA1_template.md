@@ -93,27 +93,11 @@ dfAll[isWeekend, "dayOfWeekType"] <- "weekend"
 dfAll[!isWeekend, "dayOfWeekType"] <- "weekday"
 dfAll$dayOfWeekType <- factor(dfAll$dayOfWeekType)
 #Two panel plot:  Avg Steps vs Interval for "weekday" and "weekend"
-par(mfrow = c(2, 1), mar = c(5, 4, 2, 1)) 
-#  weekend:
-dfWeekend <- dfAll[dfAll$dayOfWeekType == "weekend",]
-avgStepsPer5MinIntervalWeekend <- aggregate(dfWeekend$steps, by=list(dfWeekend$interval), FUN=mean)
-names(avgStepsPer5MinIntervalWeekend) <- c("interval", "avgSteps")
-plot(avgStepsPer5MinIntervalWeekend$interval, avgStepsPer5MinIntervalWeekend$avgSteps, type="l",
-    main="Weekend - Average Daily Activity Pattern", 
-    xlab = "5 min time interval", ylab="Avg number of steps") 
-#  weekday:
-dfWeekday <- dfAll[dfAll$dayOfWeekType == "weekday",]
-avgStepsPer5MinIntervalWeekday <- aggregate(dfWeekday$steps, by=list(dfWeekday$interval), FUN=mean)
-names(avgStepsPer5MinIntervalWeekday) <- c("interval", "avgSteps")
-plot(avgStepsPer5MinIntervalWeekday$interval, avgStepsPer5MinIntervalWeekday$avgSteps, type="l",
-    main="Weekday - Average Daily Activity Pattern", 
-    xlab = "5 min time interval", ylab="Avg number of steps") 
+avgStepsPer5MinInterval <- aggregate(dfAll$steps, by=list(dfAll$dayOfWeekType, dfAll$interval), FUN=mean)
+names(avgStepsPer5MinInterval) <- c("dayOfWeekType", "interval", "avgSteps")
+library(lattice)
+xyplot(avgSteps ~ interval | dayOfWeekType, data = avgStepsPer5MinInterval, layout=c(1,2), type="l")
 ```
 
 ![plot of chunk weekdayWeekends](figure/weekdayWeekends.png) 
-
-```r
-#reset global graphics parameter to 1 panel
-par(mfrow = c(1, 1)) 
-```
 
